@@ -6,6 +6,7 @@ var divForecastContainerEl = document.querySelector('#divForecastContainer');
 
 
 
+
 function renderedCities() {
 
     var citiesResearched = JSON.parse(localStorage.getItem('historyOfCitiesResearched')) || [];
@@ -23,6 +24,8 @@ function renderedCities() {
       $('#renderedCities').append(toDoItem);
     }
   }
+
+
 function getUV(latitude, longitude){
     fetch
     (
@@ -41,7 +44,7 @@ function getUV(latitude, longitude){
 
         spanUVContainer.innerHTML = '';
 
-        spanUVContainerEl.innerHTML = "UV: " + response.value
+        spanUVContainerEl.innerHTML = "UV Index: " + response.value
 
 
       });
@@ -55,59 +58,77 @@ function getForecast(searchTerm){
       + APIKey
       + '&units=imperial'
     )
-      .then(function(response) {
-        return response.json();
-      })
-      .then(function(response) {
-          console.log(response)
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (response) {
+            console.log(response)
+
+            divForecastContainer.innerHTML = '<br> <h3> 5-Day Forecast </h3>';
 
 
 
+            for (let i = 0; i < response.list.length; i += 8) {
 
-          for (let i = 0; i < response.list.length; i += 8) {
-
-            var temperatureForecast = response.list[i].main.temp
-            var dayOfTheWeek = moment(response.list[i].dt_txt).format('dddd')
-            var humidity = response.list[i].main.humidity
-            var emoji 
-            
-              console.log(`Day of the week: ${dayOfTheWeek}`)
-              console.log("Humidity:", humidity)
-              console.log(`Temperature: ${temperatureForecast} degrees`)
-
-
-            //   this will give me the day
-              var dayDisplay = [i]/8 + 1
-              console.log(dayDisplay)
-
-              // create anchor to append for every day of the week
-              var forecastDivEl = document.createElement("a");
-
-              
-
-              
-              // add id and class
-              forecastDivEl.setAttribute("id", "hour" + [i]);
-              forecastDivEl.setAttribute("style", "padding: 15px");
-
-              // append the humidity, dayTempEl, emojiEl into the forecastDivEl
-
-              //add the  information inside the anchor
-              forecastDivEl.innerHTML = temperatureForecast
-
-             //append child to parent
-              divForecastContainer.appendChild(forecastDivEl);
-
-          }
+                var temperatureForecast = response.list[i].main.temp
+                var dateYYYYMMDDHHMMSS = response.list[i].dt_txt
+                var dayOfTheWeek = moment(dateYYYYMMDDHHMMSS).format('dddd')
+                var calendarDay = moment(dateYYYYMMDDHHMMSS).format('LL')
+                var humidity = response.list[i].main.humidity
+                var emoji
+                var weatherDescription = response.list[i].weather[0].description
+                var weatherEmoji = response.list[i].weather[0].main
 
 
-        var latitude = response.city.coord.lat;
-        console.log("Latitude: ", latitude)
-        var longitude = response.city.coord.lon;;
-        console.log("Longitude: ", longitude);
-        getUV(latitude, longitude)
-  
-      });
+                if (weatherEmoji == "Clouds"){
+                    weatherEmoji = "☁️"
+                } else if (weatherEmoji == "Thunderstorm") {
+                    weatherEmoji = "⛈"
+                } else if (weatherEmoji == "Drizzle") {
+                    weatherEmoji = "🌧"
+                } else if (weatherEmoji == "Rain") {
+                    weatherEmoji = "🌧"
+                } else if (weatherEmoji == "Snow") {
+                    weatherEmoji = "❄️"
+                } else if (weatherEmoji == "Clear") {
+                    weatherEmoji = "☀️"
+                } 
+        
+
+                console.log(`Day of the week: ${dayOfTheWeek}`)
+                console.log("Humidity:", humidity)
+                console.log("Temperature:", temperatureForecast, "degrees")
+
+                //   this will give me the day
+                var dayDisplay = [i] / 8 + 1
+                console.log(dayDisplay)
+
+                // create anchor to append for every day of the week
+                var forecastDivEl = document.createElement("a");
+
+                // add id and class
+                forecastDivEl.setAttribute("id", "hour" + [i]);
+                forecastDivEl.setAttribute("style", "padding: 15px");
+
+                // append the humidity, dayTempEl, emojiEl into the forecastDivEl - and add an if/else statememt
+
+
+                //add the  information inside the anchor
+                forecastDivEl.innerHTML = "<br>Temperature for " + dayOfTheWeek + ", " + calendarDay + "<br>" + Math.floor(temperatureForecast) + "&#176 and a " + weatherDescription + " " + weatherEmoji + "<br>"
+                    + "Humidity: " + humidity + "%"
+                    + "<br><br>"
+
+                //append child to parent
+                divForecastContainerEl.appendChild(forecastDivEl);
+
+            }
+            var latitude = response.city.coord.lat;
+            console.log("Latitude: ", latitude)
+            var longitude = response.city.coord.lon;;
+            console.log("Longitude: ", longitude);
+            getUV(latitude, longitude)
+
+        });
 
 }
 function getCurrentWeather(searchTerm){
@@ -123,15 +144,39 @@ function getCurrentWeather(searchTerm){
       .then(function(response) {
         return response.json();
       })
-      .then(function(response) {
-        console.log("Current Weather:", response.main.temp);
-        console.log("Current Weather:", response);
-
-        spanContainer.innerHTML = '';
+      .then(function(response) { 
+          
+        
+        console.log("Current Weather API:", response);
+        
+        var selectedCity = response.name
+        var currentWeather = response.main.temp
+        var windSpeed = response.wind.speed
+        var weatherEmoji = response.weather[0].main
+        var currentDay = moment().format('LL')
+        
+        spanContainerEl.innerHTML = '';
         responseContainerEl.innerHTML = '';
 
-        spanContainerEl.innerHTML = response.name
-        responseContainerEl.innerHTML = response.main.temp;
+        //weather emoji logic
+    
+        if (weatherEmoji == "Clouds"){
+            weatherEmoji = "☁️"
+        } else if (weatherEmoji == "Thunderstorm") {
+            weatherEmoji = "⛈"
+        } else if (weatherEmoji == "Drizzle") {
+            weatherEmoji = "🌧"
+        } else if (weatherEmoji == "Rain") {
+            weatherEmoji = "🌧"
+        } else if (weatherEmoji == "Snow") {
+            weatherEmoji = "❄️"
+        } else if (weatherEmoji == "Clear") {
+            weatherEmoji = "☀️"
+        } 
+
+
+        spanContainerEl.innerHTML = selectedCity + " - " + currentDay + " " + weatherEmoji
+        responseContainerEl.innerHTML = "The current weather is " +  Math.floor(currentWeather) + "&#176 <br>" + "Wind speeds at: " + windSpeed + " mph"
   
       });
 }
