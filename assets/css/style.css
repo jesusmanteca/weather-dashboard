@@ -1,3 +1,33 @@
 .dashboard {
     text-align: center;
 }
+.forecastDivs {
+    background-color: lightblue;
+    color: lightyellow;
+    font-size: 1.3vw;
+    padding: 5px;
+    margin: 5px;
+}
+
+.currentWeatherDiv {
+    border: 1px solid whitesmoke;
+    background-color: white;
+    line-height: 45px;
+    margin: 20px 30px 20px 10px ;
+}
+.green {
+    background-color: lightgreen;
+}
+.yellow {
+    background-color: lightyellow;
+}
+.orange {
+    background-color: orange;
+}
+.red{
+    background-color: red;
+}
+
+button {
+    margin: 5px;
+}

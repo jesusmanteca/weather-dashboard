@@ -3,29 +3,39 @@ var responseContainerEl = document.querySelector('#response-container');
 var spanContainerEl = document.querySelector('#spanContainer');
 var spanUVContainerEl = document.querySelector('#spanUVContainer');
 var divForecastContainerEl = document.querySelector('#divForecastContainer');
-
-
-
+var fiveDayForecastContainerEl = document.querySelector('#fiveDayForecastContainer');
+var citiesResearched = JSON.parse(localStorage.getItem('historyOfCitiesResearched')) || [];
 
 function renderedCities() {
 
-    var citiesResearched = JSON.parse(localStorage.getItem('historyOfCitiesResearched')) || [];
     // Empties out the html
-    $('#renderCities').empty();
+    $('#renderedCities').empty();
 
     // Iterates over the 'list'
     for (var i = 0; i < citiesResearched.length; i++) {
         
-      var toDoItem = $('<h3>');
+      var toDoItem = $(`<button class =  "${citiesResearched[i]} btn btn-light"  >`);
+     
       toDoItem.text(citiesResearched[i]);
-      toDoItem.addClass('citiesResearched');
 
-      // Adds 'h3' to the renderedCities div
+
+      // Adds 'button' to the renderedCities div
       $('#renderedCities').append(toDoItem);
+
+      toDoItem.click(function(){
+          var textContent = this.textContent;
+          getCurrentWeather(textContent);
+          getForecast(textContent);
+      })
     }
-  }
+}
+function storeCityName(searchTerm){
+  
 
+    citiesResearched.unshift(searchTerm)
 
+    localStorage.setItem('historyOfCitiesResearched', JSON.stringify(citiesResearched));
+}
 function getUV(latitude, longitude){
     fetch
     (
@@ -40,11 +50,21 @@ function getUV(latitude, longitude){
         return response.json();
       })
       .then(function(response) {
-        console.log("UV:", response.value);
 
-        spanUVContainer.innerHTML = '';
+        var UVIndexValue = response.value
 
-        spanUVContainerEl.innerHTML = "UV Index: " + response.value
+        if (UVIndexValue >= 0 && UVIndexValue < 3) {
+            spanUVContainerEl.setAttribute("class", "col-12 green");
+        } else if (UVIndexValue >= 3 && UVIndexValue < 6){
+            spanUVContainerEl.setAttribute("class", "col-12 yellow");
+        } else if (UVIndexValue >= 6 && UVIndexValue < 8){
+            spanUVContainerEl.setAttribute("class", "col-12 orange");
+        } else if (UVIndexValue >= 8){
+            spanUVContainerEl.setAttribute("class", "col-12 red");
+        }
+
+        spanUVContainerEl.innerHTML = '';
+        spanUVContainerEl.innerHTML = "UV Index: " + UVIndexValue
 
 
       });
@@ -62,11 +82,7 @@ function getForecast(searchTerm){
             return response.json();
         })
         .then(function (response) {
-            console.log(response)
-
-            divForecastContainer.innerHTML = '<br> <h3> 5-Day Forecast </h3>';
-
-
+            console.log("Forecast API:", response)
 
             for (let i = 0; i < response.list.length; i += 8) {
 
@@ -93,39 +109,30 @@ function getForecast(searchTerm){
                 } else if (weatherEmoji == "Clear") {
                     weatherEmoji = "☀️"
                 } 
-        
-
-                console.log(`Day of the week: ${dayOfTheWeek}`)
-                console.log("Humidity:", humidity)
-                console.log("Temperature:", temperatureForecast, "degrees")
-
-                //   this will give me the day
-                var dayDisplay = [i] / 8 + 1
-                console.log(dayDisplay)
 
                 // create anchor to append for every day of the week
-                var forecastDivEl = document.createElement("a");
+                var forecastDivEl = document.createElement("div");
 
                 // add id and class
                 forecastDivEl.setAttribute("id", "hour" + [i]);
-                forecastDivEl.setAttribute("style", "padding: 15px");
+                forecastDivEl.setAttribute("class", "col forecastDivs");
 
                 // append the humidity, dayTempEl, emojiEl into the forecastDivEl - and add an if/else statememt
 
 
                 //add the  information inside the anchor
-                forecastDivEl.innerHTML = "<br>Temperature for " + dayOfTheWeek + ", " + calendarDay + "<br>" + Math.floor(temperatureForecast) + "&#176 and a " + weatherDescription + " " + weatherEmoji + "<br>"
+                forecastDivEl.innerHTML = dayOfTheWeek + "<br>" + calendarDay + "<br>" + "Temp: " + Math.floor(temperatureForecast) + "&#176" + "<br>" + weatherDescription + "<br>" + weatherEmoji + "<br>"
                     + "Humidity: " + humidity + "%"
-                    + "<br><br>"
+                    + "<br>"
+
+                
 
                 //append child to parent
                 divForecastContainerEl.appendChild(forecastDivEl);
 
             }
             var latitude = response.city.coord.lat;
-            console.log("Latitude: ", latitude)
             var longitude = response.city.coord.lon;;
-            console.log("Longitude: ", longitude);
             getUV(latitude, longitude)
 
         });
@@ -157,6 +164,8 @@ function getCurrentWeather(searchTerm){
         
         spanContainerEl.innerHTML = '';
         responseContainerEl.innerHTML = '';
+        fiveDayForecastContainerEl.innerHTML = '';
+        divForecastContainerEl.innerHTML = '';
 
         //weather emoji logic
     
@@ -175,8 +184,11 @@ function getCurrentWeather(searchTerm){
         } 
 
 
-        spanContainerEl.innerHTML = selectedCity + " - " + currentDay + " " + weatherEmoji
-        responseContainerEl.innerHTML = "The current weather is " +  Math.floor(currentWeather) + "&#176 <br>" + "Wind speeds at: " + windSpeed + " mph"
+        spanContainerEl.innerHTML = "<h2>" + weatherEmoji + " " + selectedCity + " - " + currentDay +  "</h2>"
+
+        responseContainerEl.innerHTML = "The current weather is " +  "<b> " + Math.floor(currentWeather) + "&#176 </b> <br>" + "Wind speeds at: " + windSpeed + " mph" + "<br>"
+
+        fiveDayForecastContainerEl.innerHTML = "<h3>5 Day Forecast</h3>"
   
       });
 }
@@ -187,16 +199,16 @@ function searchHandler(event) {
     if (searchTerm) {
         getCurrentWeather(searchTerm);
         getForecast(searchTerm);
-        
+        storeCityName(searchTerm)
+        renderedCities(); 
         document.querySelector('#searchTerm').value = ""
     } else {
         alert("Please enter a city");
     }
 
       
-  }
+}
 
-renderedCities();
 $("#searchBtn").click(searchHandler)
   
   
