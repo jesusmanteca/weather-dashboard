@@ -15,13 +15,9 @@ function renderedCities() {
     for (var i = 0; i < citiesResearched.length; i++) {
         
       var toDoItem = $(`<button class =  "${citiesResearched[i]} btn btn-light"  >`);
-     
       toDoItem.text(citiesResearched[i]);
-
-
       // Adds 'button' to the renderedCities div
       $('#renderedCities').append(toDoItem);
-
       toDoItem.click(function(){
           var textContent = this.textContent;
           getCurrentWeather(textContent);
@@ -131,6 +127,8 @@ function getForecast(searchTerm){
                 divForecastContainerEl.appendChild(forecastDivEl);
 
             }
+
+            
             var latitude = response.city.coord.lat;
             var longitude = response.city.coord.lon;;
             getUV(latitude, longitude)
