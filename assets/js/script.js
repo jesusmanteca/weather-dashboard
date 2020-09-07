@@ -68,7 +68,7 @@ function getUV(latitude, longitude){
 function getForecast(searchTerm){
     fetch
     (
-      'http://api.openweathermap.org/data/2.5/forecast?q='
+      'https://api.openweathermap.org/data/2.5/forecast?q='
       + searchTerm 
       + '&appid='
       + APIKey
@@ -128,7 +128,7 @@ function getForecast(searchTerm){
 
             }
 
-            
+
             var latitude = response.city.coord.lat;
             var longitude = response.city.coord.lon;;
             getUV(latitude, longitude)
@@ -140,7 +140,7 @@ function getCurrentWeather(searchTerm){
 
     fetch
     (
-      'http://api.openweathermap.org/data/2.5/weather?q='
+      'https://api.openweathermap.org/data/2.5/weather?q='
       + searchTerm 
       + '&appid='
       + APIKey
