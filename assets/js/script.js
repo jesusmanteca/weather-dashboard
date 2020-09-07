@@ -78,7 +78,7 @@ function getForecast(searchTerm){
             return response.json();
         })
         .then(function (response) {
-            console.log("Forecast API:", response)
+            // console.log("Forecast API:", response)
 
             for (let i = 0; i < response.list.length; i += 8) {
 
@@ -152,7 +152,7 @@ function getCurrentWeather(searchTerm){
       .then(function(response) { 
           
         
-        console.log("Current Weather API:", response);
+        // console.log("Current Weather API:", response);
         
         var selectedCity = response.name
         var currentWeather = response.main.temp
